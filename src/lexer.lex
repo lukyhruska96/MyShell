@@ -1,19 +1,30 @@
 %{
-    #include "lexer.tab.h"
+    #include "parser.tab.h"
+    #include <stdio.h>
+    #include "shell.h"
 %}
+%option noyywrap
 
-whitespace      [\s]
-newline         \n
-out             \>
-in              \<
-token           [^{whitespace}{in}{out}{newline}]+
+WHITESPACE      [ \t]
+OUT             \>
+IN              \<
+token           [^ \t\n\>\<\#;]+
+
+%x comment
 
 %%
-{newline}       
-{out}           { return lex_make_out(yytext); }
-{in}            { return lex_make_in(yytext); }
-\|              { return lex_make_pipe(yytext); }
-{token}         { return lex_make_token(yytext); }
-{whitespace}+   
+<comment>[^\n]+
+
+{WHITESPACE}+
+{OUT}           { return (OUT); }
+{IN}            { return (IN); }
+\|              { return (PIPE); }
+;               { return (SEMICOLON); }
+\#              { BEGIN(comment); }
+{token}         { yylval.token = strdup(yytext); return (TOKEN); }
+<INITIAL,comment>\n              { return (END_OF_LINE); }
+
+<<EOF>>         { return (END_OF_FILE); }
+
 
 %%
