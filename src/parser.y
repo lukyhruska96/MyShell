@@ -45,7 +45,7 @@ lines:
     | END_OF_LINE line lines;
 
 line:
-    command commands end;
+    | command commands end;
 
 end:
     | END_OF_FILE;
