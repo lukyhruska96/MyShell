@@ -23,10 +23,10 @@ CPP_SOURCES := $(filter-out $(BISON_SRC) $(FLEX_SRC),$(shell find $(SRC_DIR) -na
 OBJ_FILES := $(CPP_SOURCES:.c=.o) $(BISON_SRC:.c=.o) $(FLEX_SRC:.c=.o)
 
 ./mysh: $(OBJ_FILES)
-	$(CC) $(CFLAGS) $(OBJ_FILES) -lreadline -o mysh
+	$(CC) $(CFLAGS) -g $(OBJ_FILES) -lreadline -o mysh
 
 $(OBJ_FILES) : %.o : %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -g -c $< -o $@
 
 clean: CLEAN_FLEX CLEAN_BISON CLEAN_OBJ CLEAN_EXEC
 
