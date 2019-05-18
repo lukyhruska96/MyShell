@@ -4,6 +4,7 @@
 	#include <stdlib.h>
 	#include <string.h>
 	#include <libgen.h>
+	#include <unistd.h>
 	#include "command.h"
 	#include "command.h"
 
@@ -40,6 +41,7 @@
 		char *command;
 		int argc;
 		char **argv;
+		char ** redirections;
 		int pd[2];
 	};
 %}
@@ -48,6 +50,7 @@
 
 %union {
 	char *token;
+	char **redirections;
 	struct command_s *command;
 	struct commlist_s *commands;
 	struct toklist_s *list;
@@ -77,12 +80,14 @@
 %token <token> TOKEN "identifier"
 %token SEMICOLON ";"
 %token OUT ">"
+%token APPEND ">>"
 %token IN "<"
 %token PIPE "pipe"
 %token END_OF_LINE "new line"
 %token END_OF_FILE "EOF"
 
 %type <list> args;
+%type <redirections> redirections;
 %type <command> command;
 %type <commands> commands;
 
@@ -95,23 +100,27 @@ lines:
 
 line:
 	 command commands end {
-		struct commentry_s *np;
+		struct commentry_s *np = malloc(sizeof(struct commentry_s));
 		struct commentry_s *np_next;
-		np = $1;
+		np->command = $1;
 		int pd[2] = {0, 0};
-		free($1);
 		while (!SLIST_EMPTY(&$2->head)) {
 				np_next = SLIST_FIRST(&$2->head);
 				SLIST_REMOVE_HEAD(&$2->head, entries);
 				pd[1] = np_next->command->pd[1];
-				comm_handle(np->command->command, np->command->argc, np->command->argv, &pd);
+				comm_handle(np->command->command, np->command->argc, np->command->argv, (int*) &pd, np->command->redirections);
+				if(pd[0]) close(pd[0]);
+				if(pd[1]) close(pd[1]);
 				pd[0] = np_next->command->pd[0];
 				free(np->command);
 				free(np);
 				np = np_next;
 		}
 		pd[1] = 0;
-		comm_handle(np->command->command, np->command->argc, np->command->argv, &pd);
+		comm_handle(np->command->command, np->command->argc, np->command->argv, (int*) &pd, np->command->redirections);
+		if(pd[0]) close(pd[0]);
+		free(np->command);
+		free(np);
 		free($2);
 	};
 
@@ -153,7 +162,7 @@ commands: {
 	};
 
 command:
-	TOKEN args {
+	TOKEN args redirections {
 		char **args = malloc(sizeof(char*)*($2->size+2));
 		struct toklisth_s head = $2->head;
 		args[0] = basename($1);
@@ -173,6 +182,7 @@ command:
 		data->argv = args;
 		data->pd[0] = 0;
 		data->pd[1] = 0;
+		data->redirections = $3;
 		$$ = data;
 	};
 
@@ -191,6 +201,11 @@ args: {
 	$2->size++;
 	$$ = $2;
 };
+
+redirections: { $$ = (char**) malloc(sizeof(char*)*3); $$[0] = NULL; $$[1] = NULL; $$[2] = NULL; }
+	| APPEND TOKEN redirections { if($3[2] == NULL && $3[1] == NULL) $3[2] = strdup($2); $$ = $3; }
+	| IN TOKEN redirections { if($3[0] == NULL) $3[0] = strdup($2); $$ = $3; }
+	| OUT TOKEN redirections { if($3[2] == NULL && $3[1] == NULL) $3[1] = strdup($2); $$ = $3; }
 
 %%
 

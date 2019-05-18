@@ -1,7 +1,9 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
@@ -15,7 +17,7 @@ extern int EXIT_CODE;
 pid_t RUNNING = 0;
 
 void
-comm_handle(char * command, int argc, char * argv[], int * pd)
+comm_handle(char * command, int argc, char * argv[], int * pd, char ** redirections)
 {
 	if (!comm_is_known(command, argc, argv)) {
 		int status;
@@ -31,6 +33,18 @@ comm_handle(char * command, int argc, char * argv[], int * pd)
 				}
 				if(pd[1]) {
 					close(1); dup(pd[1]); close(pd[1]);
+				}
+				if(redirections[0] != NULL) {
+					close(0);
+					open(redirections[0], O_RDONLY);
+				}
+				if(redirections[1] != NULL) {
+					close(1);
+					open(redirections[1], O_WRONLY | O_CREAT | O_TRUNC, 0666);
+				}
+				if(redirections[2] != NULL) {
+					close(1);
+					open(redirections[2], O_WRONLY | O_CREAT | O_APPEND, 0666);
 				}
 				execvp(command, argv);
 				switch (errno) {

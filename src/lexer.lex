@@ -8,6 +8,7 @@
 %option noyywrap
 
 WHITESPACE		[ \t]
+APPEND			\>\>
 OUT				\>
 IN				\<
 token			[^ \t\n\>\<\#;]+
@@ -20,6 +21,7 @@ token			[^ \t\n\>\<\#;]+
 {WHITESPACE}+
 {OUT}			{ return (OUT); }
 {IN}			{ return (IN); }
+{APPEND}		{ return (APPEND); }
 \|				{ return (PIPE); }
 ;				{ return (SEMICOLON); }
 \#              { BEGIN(comment); }
