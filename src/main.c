@@ -36,8 +36,8 @@ main(int argc, char * argv[])
 	while ((opt = getopt(argc, argv, "abc:")) != -1)
 		switch (opt) {
 			case 'c':
-				optlen = strlen(optarg);
-				opts.command = malloc(optlen + 1);
+				optlen			= strlen(optarg);
+				opts.command 	= malloc(optlen + 1);
 				strncpy(opts.command, optarg, optlen);
 				opts.command[optlen] = '\0';
 				break;
@@ -55,25 +55,25 @@ main(int argc, char * argv[])
 		yyparse();
 		yylex_destroy();
 		free(opts.command);
-	} else if (optind < argc)    {
+	} else if (optind < argc) {
 		int fd = open(argv[optind], O_RDONLY);
 		if (fd == -1) {
 			if (errno == EACCES) {
 				fprintf(stderr, "Unable to find or open "
-				"specified file.\n");
-			} else   {
+				    "specified file.\n");
+			} else {
 				fprintf(stderr, "Unhandled exception while "
-				"opening the file.\n");
+				    "opening the file.\n");
 			}
 			EXIT_CODE = 1;
 			sh_exit();
 		}
-		int buff_size = 4096;
-		char * buff = malloc(buff_size);
+		int buff_size	= 4096;
+		char * buff		= malloc(buff_size);
 		char * buff_loc = buff;
 		ssize_t buff_read;
-		while ((buff_read = read(fd, buff_loc, buff_size -
-		    (buff_loc - buff)))) {
+		while ((buff_read = read(fd, buff_loc, buff_size
+		    - (buff_loc - buff)))) {
 			if (buff_read == -1) {
 				fprintf(stderr, "Unable to read from file.\n");
 				free(buff);
@@ -82,10 +82,10 @@ main(int argc, char * argv[])
 				sh_exit();
 			}
 			if (buff_read == buff_size - (buff_loc - buff)) {
-				int offset = buff_loc - buff;
-				buff_size *= 2;
-				buff = realloc(buff, buff_size);
-				buff_loc = buff + offset;
+				int offset 	= buff_loc - buff;
+				buff_size 	*= 2;
+				buff		= realloc(buff, buff_size);
+				buff_loc	= buff + offset;
 			}
 		}
 		yy_scan_string(buff);
@@ -93,7 +93,7 @@ main(int argc, char * argv[])
 		yylex_destroy();
 		free(buff);
 		close(fd);
-	} else   {
+	} else {
 		char * line = readline(sh_getprompt());
 		while (line != NULL) {
 			yy_scan_string(line);

@@ -17,7 +17,8 @@ extern int EXIT_CODE;
 pid_t RUNNING = 0;
 
 void
-comm_handle(char * command, int argc, char * argv[], int * pd, char ** redirections)
+comm_handle(char * command, int argc, char * argv[], int * pd,
+    char ** redirections)
 {
 	if (!comm_is_known(command, argc, argv)) {
 		int status;
@@ -28,23 +29,29 @@ comm_handle(char * command, int argc, char * argv[], int * pd, char ** redirecti
 				EXIT_CODE = 1;
 				break;
 			case 0:
-				if(pd[0]) {
-					close(0); dup(pd[0]); close(pd[0]);
+				if (pd[0]) {
+					close(0);
+					dup(pd[0]);
+					close(pd[0]);
 				}
-				if(pd[1]) {
-					close(1); dup(pd[1]); close(pd[1]);
+				if (pd[1]) {
+					close(1);
+					dup(pd[1]);
+					close(pd[1]);
 				}
-				if(redirections[0] != NULL) {
+				if (redirections[0] != NULL) {
 					close(0);
 					open(redirections[0], O_RDONLY);
 				}
-				if(redirections[1] != NULL) {
+				if (redirections[1] != NULL) {
 					close(1);
-					open(redirections[1], O_WRONLY | O_CREAT | O_TRUNC, 0666);
+					open(redirections[1], O_WRONLY | O_CREAT
+					    | O_TRUNC, 0666);
 				}
-				if(redirections[2] != NULL) {
+				if (redirections[2] != NULL) {
 					close(1);
-					open(redirections[2], O_WRONLY | O_CREAT | O_APPEND, 0666);
+					open(redirections[2], O_WRONLY | O_CREAT
+					    | O_APPEND, 0666);
 				}
 				execvp(command, argv);
 				switch (errno) {
@@ -84,7 +91,7 @@ comm_is_known(char * command, int argc, char * argv[])
 	if (cd_iscd(command)) {
 		cd_handle(argc, argv);
 		return (1);
-	} else if (sh_isexit(command))    {
+	} else if (sh_isexit(command)) {
 		comm_cleancomm(command, argc, argv);
 		sh_exit();
 	}

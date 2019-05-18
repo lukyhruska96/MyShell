@@ -10,7 +10,7 @@
 extern int EXIT_CODE;
 extern int errno;
 
-char * PWD = NULL;
+char * PWD    = NULL;
 char * OLDPWD = NULL;
 
 int

@@ -1,11 +1,11 @@
-#ifndef	CD_H
-#define	CD_H
+#ifndef CD_H
+#define CD_H
 
 int
-cd_iscd(char *command);
+cd_iscd(char * command);
 
 void
-cd_handle(int argc, char *argv[]);
+cd_handle(int argc, char * argv[]);
 
 void
 cd_cleanup();

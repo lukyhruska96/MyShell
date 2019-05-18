@@ -58,7 +58,7 @@ sh_exit_signal(int signum)
 		kill(RUNNING, signum);
 		EXIT_CODE = 128 + signum;
 		fprintf(stderr, "Killed by signal %d.\n", signum);
-	} else   {
+	} else {
 		fprintf(stdout, "\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);
@@ -73,7 +73,7 @@ sh_getprompt()
 		if (cd_init() != 0) {
 			sprintf(SH_PROMPT, "mybash:%s$ ", PWD);
 		}
-	} else   {
+	} else {
 		sprintf(SH_PROMPT, "mybash:%s$ ", PWD);
 	}
 	return (SH_PROMPT);
