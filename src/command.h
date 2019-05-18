@@ -5,7 +5,7 @@ int
 comm_is_known(char * command, int argc, char * argv[]);
 
 void
-comm_handle(char * command, int argc, char * argv[]);
+comm_handle(char * command, int argc, char * argv[], int * pd);
 
 void
 comm_cleancomm(char * command, int argc, char * argv[]);

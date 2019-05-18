@@ -15,7 +15,7 @@ extern int EXIT_CODE;
 pid_t RUNNING = 0;
 
 void
-comm_handle(char * command, int argc, char * argv[])
+comm_handle(char * command, int argc, char * argv[], int * pd)
 {
 	if (!comm_is_known(command, argc, argv)) {
 		int status;
@@ -26,6 +26,12 @@ comm_handle(char * command, int argc, char * argv[])
 				EXIT_CODE = 1;
 				break;
 			case 0:
+				if(pd[0]) {
+					close(0); dup(pd[0]); close(pd[0]);
+				}
+				if(pd[1]) {
+					close(1); dup(pd[1]); close(pd[1]);
+				}
 				execvp(command, argv);
 				switch (errno) {
 					case EACCES:

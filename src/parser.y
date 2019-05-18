@@ -40,6 +40,7 @@
 		char *command;
 		int argc;
 		char **argv;
+		int pd[2];
 	};
 %}
 
@@ -95,28 +96,43 @@ lines:
 line:
 	 command commands end {
 		struct commentry_s *np;
-		comm_handle($1->command, $1->argc, $1->argv);
+		struct commentry_s *np_next;
+		np = $1;
+		int pd[2] = {0, 0};
 		free($1);
 		while (!SLIST_EMPTY(&$2->head)) {
-				np = SLIST_FIRST(&$2->head);
+				np_next = SLIST_FIRST(&$2->head);
 				SLIST_REMOVE_HEAD(&$2->head, entries);
-				comm_handle(np->command->command, np->command->argc, np->command->argv);
+				pd[1] = np_next->command->pd[1];
+				comm_handle(np->command->command, np->command->argc, np->command->argv, &pd);
+				pd[0] = np_next->command->pd[0];
 				free(np->command);
 				free(np);
+				np = np_next;
 		}
+		pd[1] = 0;
+		comm_handle(np->command->command, np->command->argc, np->command->argv, &pd);
 		free($2);
 	};
 
 end:
 	END_OF_LINE | END_OF_FILE;
 
-commands:{
+commands: {
 		struct commlist_s *list = malloc(sizeof(struct commlist_s));
 		struct commlisth_s head = SLIST_HEAD_INITIALIZER(head);
 		list->size = 0;
 		list->head = head;
 		SLIST_INIT(&list->head); 
 		$$ = list;
+	}
+	| PIPE command commands {
+		struct commentry_s *tmp = malloc(sizeof(struct commentry_s));
+		tmp->command = $2;
+		pipe(tmp->command->pd);
+		SLIST_INSERT_HEAD(&$3->head, tmp, entries);
+		$3->size++;
+		$$ = $3;
 	}
 	| SEMICOLON command commands {
 		struct commentry_s *tmp = malloc(sizeof(struct commentry_s));
@@ -155,6 +171,8 @@ command:
 		data->command = $1;
 		data->argc = i;
 		data->argv = args;
+		data->pd[0] = 0;
+		data->pd[1] = 0;
 		$$ = data;
 	};
 
