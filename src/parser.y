@@ -1,4 +1,5 @@
 %{
+	#include <errno.h>
 	#include <stdio.h>
 	#include <sys/queue.h>
 	#include <stdlib.h>
@@ -101,6 +102,8 @@ lines:
 line:
 	 command commands end {
 		struct commentry_s *np = malloc(sizeof(struct commentry_s));
+		if(np == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		struct commentry_s *np_next;
 		np->command = $1;
 		int pd[2] = {0, 0};
@@ -129,6 +132,8 @@ end:
 
 commands: {
 		struct commlist_s *list = malloc(sizeof(struct commlist_s));
+		if(list == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		struct commlisth_s head = SLIST_HEAD_INITIALIZER(head);
 		list->size = 0;
 		list->head = head;
@@ -137,6 +142,8 @@ commands: {
 	}
 	| PIPE command commands {
 		struct commentry_s *tmp = malloc(sizeof(struct commentry_s));
+		if(tmp == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		tmp->command = $2;
 		pipe(tmp->command->pd);
 		SLIST_INSERT_HEAD(&$3->head, tmp, entries);
@@ -145,6 +152,8 @@ commands: {
 	}
 	| SEMICOLON command commands {
 		struct commentry_s *tmp = malloc(sizeof(struct commentry_s));
+		if(tmp == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		tmp->command = $2;
 		SLIST_INSERT_HEAD(&$3->head, tmp, entries);
 		$3->size++;
@@ -154,6 +163,8 @@ commands: {
 	SEMICOLON
 	{
 		struct commlist_s *list = malloc(sizeof(struct commlist_s));
+		if(list == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		struct commlisth_s head = SLIST_HEAD_INITIALIZER(head);
 		list->size = 0;
 		list->head = head;
@@ -164,6 +175,8 @@ commands: {
 command:
 	TOKEN args redirections {
 		char **args = malloc(sizeof(char*)*($2->size+2));
+		if(args == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		struct toklisth_s head = $2->head;
 		args[0] = basename($1);
 		int i = 1;
@@ -177,6 +190,8 @@ command:
 		args[i] = NULL;
 		free($2);
 		struct command_s *data = malloc(sizeof(struct command_s));
+		if(data == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		data->command = $1;
 		data->argc = i;
 		data->argv = args;
@@ -188,6 +203,8 @@ command:
 
 args: {
 	struct toklist_s *list = malloc(sizeof(struct toklist_s));
+	if(list == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 	struct toklisth_s head = SLIST_HEAD_INITIALIZER(head);
 	list->size = 0;
 	list->head = head;
@@ -196,16 +213,25 @@ args: {
 	}
 	| TOKEN args {
 	struct tokentry_s *tmp = (struct tokentry_s*) malloc(sizeof(struct tokentry_s));
+	if(tmp == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 	tmp->token = $1;
 	SLIST_INSERT_HEAD(&$2->head, tmp, entries);
 	$2->size++;
 	$$ = $2;
 };
 
-redirections: { $$ = (char**) malloc(sizeof(char*)*3); $$[0] = NULL; $$[1] = NULL; $$[2] = NULL; }
-	| APPEND TOKEN redirections { if($3[2] == NULL && $3[1] == NULL) $3[2] = strdup($2); $$ = $3; }
-	| IN TOKEN redirections { if($3[0] == NULL) $3[0] = strdup($2); $$ = $3; }
-	| OUT TOKEN redirections { if($3[2] == NULL && $3[1] == NULL) $3[1] = strdup($2); $$ = $3; }
+redirections: {
+		$$ = (char**) malloc(sizeof(char*)*3);
+		if($$ == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
+		$$[0] = NULL;
+		$$[1] = NULL;
+		$$[2] = NULL;
+	}
+	| APPEND TOKEN redirections { if($3[2] == NULL && $3[1] == NULL) $3[2] = $2; $$ = $3; }
+	| IN TOKEN redirections { if($3[0] == NULL) $3[0] = $2; $$ = $3; }
+	| OUT TOKEN redirections { if($3[2] == NULL && $3[1] == NULL) $3[1] = $2; $$ = $3; }
 
 %%
 

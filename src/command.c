@@ -20,7 +20,7 @@ void
 comm_handle(char * command, int argc, char * argv[], int * pd,
     char ** redirections)
 {
-	if (!comm_is_known(command, argc, argv)) {
+	if (!comm_handle_internal(command, argc, argv)) {
 		int status;
 		switch (RUNNING = fork()) {
 			case -1:
@@ -67,8 +67,21 @@ comm_handle(char * command, int argc, char * argv[], int * pd,
 				}
 				EXIT_CODE = 127;
 				sh_exit();
+				break;
 			default:
-				waitpid(RUNNING, &status, 0);
+				if (waitpid(RUNNING, &status, 0) == -1) {
+					if (errno == ECHILD) {
+						fprintf(stderr, "The specified "
+						    "process does not "
+						    "exist.\n");
+					} else if (errno == EINTR) {
+						fprintf(stderr, "An unblocked "
+						    "signal was cought.\n");
+					} else if (errno == EINVAL) {
+						fprintf(stderr, "The options "
+						    "argument was invalid.\n");
+					}
+				}
 				RUNNING = 0;
 				if (WIFEXITED(status)) {
 					EXIT_CODE = WEXITSTATUS(status);
@@ -86,7 +99,7 @@ comm_handle(char * command, int argc, char * argv[], int * pd,
 } /* comm_handle */
 
 int
-comm_is_known(char * command, int argc, char * argv[])
+comm_handle_internal(char * command, int argc, char * argv[])
 {
 	if (cd_iscd(command)) {
 		cd_handle(argc, argv);

@@ -1,5 +1,6 @@
 #include "shell.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -25,9 +26,20 @@ sh_exit_signal(int signum);
 void
 sh_init()
 {
-	signal(SIGINT, sh_exit_signal);
+	struct sigaction act;
+
+	act.sa_handler = sh_exit_signal;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	if (sigaction(SIGINT, &act, NULL) == -1) {
+		if (errno == EFAULT)
+			fprintf(stderr, "Invalid arguments act or oldact.\n");
+		if (errno == EINVAL)
+			fprintf(stderr, "An  invalid  signal  was "
+			    "specified.\n");
+	}
 	SH_PROMPT = malloc(4096);
-	strcpy(SH_PROMPT, "?$>");
+	sprintf(SH_PROMPT, "?$>");
 }
 
 void

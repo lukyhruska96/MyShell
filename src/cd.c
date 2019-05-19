@@ -31,8 +31,14 @@ cd_handle(int argc, char * argv[])
 			return;
 		}
 		char ** args = malloc(sizeof (char *) * 3);
+		if (args == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		args[0] = argv[0];
 		args[1] = strdup(home);
+		if (args[1] == NULL) {
+			fprintf(stderr, "Insufficient memory available to "
+			    "allocate duplicate string.\n");
+		}
 		args[2] = NULL;
 		cd_handle(2, args);
 		free(args[1]);
@@ -54,8 +60,14 @@ cd_handle(int argc, char * argv[])
 				return;
 			}
 			OLDPWD = strdup(oldpwd);
+			if (OLDPWD == NULL) {
+				fprintf(stderr, "Insufficient memory available "
+				"to allocate duplicate string.\n");
+			}
 		}
 		char ** args = malloc(sizeof (char *) * 3);
+		if (args == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		args[0] = argv[0];
 		args[1] = OLDPWD;
 		args[2] = NULL;
@@ -99,6 +111,10 @@ cd_handle(int argc, char * argv[])
 		free(OLDPWD);
 	}
 	OLDPWD = strdup(PWD);
+	if (OLDPWD == NULL) {
+		fprintf(stderr, "Insufficient memory available to "
+		    "allocate duplicate string.\n");
+	}
 	if (getcwd(PWD, 4096) == NULL) {
 		free(PWD);
 		PWD = NULL;
@@ -126,6 +142,8 @@ int
 cd_init()
 {
 	PWD = malloc(4096);
+	if (PWD == NULL && errno == ENOMEM)
+		fprintf(stderr, "Out  of  memory.\n");
 	if (getcwd(PWD, 4096) == NULL) {
 		free(PWD);
 		PWD = NULL;

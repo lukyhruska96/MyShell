@@ -2,7 +2,7 @@
 #define COMMAND_H
 
 int
-comm_is_known(char * command, int argc, char * argv[]);
+comm_handle_internal(char * command, int argc, char * argv[]);
 
 void
 comm_handle(char * command, int argc, char * argv[], int * pd,

@@ -31,13 +31,15 @@ main(int argc, char * argv[])
 		char * command;
 	} opts;
 	int opt;
-	opts.command == NULL;
+	opts.command = NULL;
 	int optlen;
-	while ((opt = getopt(argc, argv, "abc:")) != -1)
+	while ((opt = getopt(argc, argv, "c:")) != -1)
 		switch (opt) {
 			case 'c':
 				optlen			= strlen(optarg);
 				opts.command 	= malloc(optlen + 1);
+				if (opts.command == NULL && errno == ENOMEM)
+					fprintf(stderr, "Out  of  memory.\n");
 				strncpy(opts.command, optarg, optlen);
 				opts.command[optlen] = '\0';
 				break;
@@ -68,8 +70,10 @@ main(int argc, char * argv[])
 			EXIT_CODE = 1;
 			sh_exit();
 		}
-		int buff_size	= 4096;
-		char * buff		= malloc(buff_size);
+		int buff_size = 4096;
+		char * buff   = malloc(buff_size);
+		if (buff == NULL && errno == ENOMEM)
+			fprintf(stderr, "Out  of  memory.\n");
 		char * buff_loc = buff;
 		ssize_t buff_read;
 		while ((buff_read = read(fd, buff_loc, buff_size
@@ -82,8 +86,8 @@ main(int argc, char * argv[])
 				sh_exit();
 			}
 			if (buff_read == buff_size - (buff_loc - buff)) {
-				int offset 	= buff_loc - buff;
-				buff_size 	*= 2;
+				int offset	= buff_loc - buff;
+				buff_size	*= 2;
 				buff		= realloc(buff, buff_size);
 				buff_loc	= buff + offset;
 			}
