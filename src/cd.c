@@ -46,7 +46,7 @@ cd_handle(int argc, char * argv[])
 		return;
 	}
 	if (argc != 2) {
-		fprintf(stderr, "usage: cd [path | -]");
+		fprintf(stderr, "usage: cd [path | -]\n");
 		EXIT_CODE = 1;
 		return;
 	}
@@ -83,21 +83,21 @@ cd_handle(int argc, char * argv[])
 	if (chdir(argv[1]) == -1) {
 		switch (errno) {
 			case EACCES:
-				fprintf(stderr, "%s: Search permission is "
-				    "denied for one of the components of "
-				    "path.\n", argv[0]);
-				break;
+			fprintf(stderr, "%s: Search permission is "
+				"denied for one of the components of "
+				"path.\n", argv[0]);
+			break;
 			case ENOENT:
-				fprintf(stderr, "%s: The directory specified "
-				    "in path does not exist.\n", argv[0]);
-				break;
+			fprintf(stderr, "%s: The directory specified "
+				"in path does not exist.\n", argv[0]);
+			break;
 			case ENOTDIR:
-				fprintf(stderr, "%s: A component of path is "
-				    "not a directory.\n", argv[0]);
-				break;
+			fprintf(stderr, "%s: A component of path is "
+				"not a directory.\n", argv[0]);
+			break;
 			default:
-				fprintf(stderr, "%s: Unknown error while "
-				    "changing directory.\n", argv[0]);
+			fprintf(stderr, "%s: Unknown error while "
+				"changing directory.\n", argv[0]);
 		}
 		EXIT_CODE = 1;
 		return;

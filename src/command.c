@@ -24,74 +24,74 @@ comm_handle(char * command, int argc, char * argv[], int * pd,
 		int status;
 		switch (RUNNING = fork()) {
 			case -1:
-				fprintf(stderr, "There were problem while "
-				    "forking this process.\n");
-				EXIT_CODE = 1;
-				break;
+			fprintf(stderr, "There were problem while "
+				"forking this process.\n");
+			EXIT_CODE = 1;
+			break;
 			case 0:
-				if (pd[0]) {
-					close(0);
-					dup(pd[0]);
-					close(pd[0]);
-				}
-				if (pd[1]) {
-					close(1);
-					dup(pd[1]);
-					close(pd[1]);
-				}
-				if (redirections[0] != NULL) {
-					close(0);
-					open(redirections[0], O_RDONLY);
-				}
-				if (redirections[1] != NULL) {
-					close(1);
-					open(redirections[1], O_WRONLY | O_CREAT
-					    | O_TRUNC, 0666);
-				}
-				if (redirections[2] != NULL) {
-					close(1);
-					open(redirections[2], O_WRONLY | O_CREAT
-					    | O_APPEND, 0666);
-				}
-				execvp(command, argv);
-				switch (errno) {
-					case EACCES:
-						fprintf(stderr, "%s: Permission"
-						    " denied\n", command);
-						break;
-					default:
-						fprintf(stderr, "%s: No such "
-						    "file or directory\n",
-						    command);
-						break;
-				}
-				EXIT_CODE = 127;
-				sh_exit();
-				break;
+			if (pd[0]) {
+				close(0);
+				dup(pd[0]);
+				close(pd[0]);
+			}
+			if (pd[1]) {
+				close(1);
+				dup(pd[1]);
+				close(pd[1]);
+			}
+			if (redirections[0] != NULL) {
+				close(0);
+				open(redirections[0], O_RDONLY);
+			}
+			if (redirections[1] != NULL) {
+				close(1);
+				open(redirections[1], O_WRONLY | O_CREAT
+					| O_TRUNC, 0666);
+			}
+			if (redirections[2] != NULL) {
+				close(1);
+				open(redirections[2], O_WRONLY | O_CREAT
+					| O_APPEND, 0666);
+			}
+			execvp(command, argv);
+			switch (errno) {
+				case EACCES:
+					fprintf(stderr, "%s: Permission"
+						" denied\n", command);
+					break;
+				default:
+					fprintf(stderr, "%s: No such "
+						"file or directory\n",
+						command);
+					break;
+			}
+			EXIT_CODE = 127;
+			sh_exit();
+			break;
 			default:
-				if (waitpid(RUNNING, &status, 0) == -1) {
-					if (errno == ECHILD) {
-						fprintf(stderr, "The specified "
-						    "process does not "
-						    "exist.\n");
-					} else if (errno == EINTR) {
-						fprintf(stderr, "An unblocked "
-						    "signal was cought.\n");
-					} else if (errno == EINVAL) {
-						fprintf(stderr, "The options "
-						    "argument was invalid.\n");
-					}
+			if (waitpid(RUNNING, &status, 0) == -1) {
+				if (errno == ECHILD) {
+					fprintf(stderr, "The specified "
+						"process does not "
+						"exist.\n");
+				} else if (errno == EINTR) {
+					fprintf(stderr, "An unblocked "
+						"signal was cought.\n");
+				} else if (errno == EINVAL) {
+					fprintf(stderr, "The options "
+						"argument was invalid.\n");
 				}
-				RUNNING = 0;
-				if (WIFEXITED(status)) {
-					EXIT_CODE = WEXITSTATUS(status);
-				} else if (WIFSIGNALED(status)) {
-					EXIT_CODE = 128 + WTERMSIG(status);
-				} else {
-					fprintf(stderr,
-					    "%s: Unexpected error.\n", command);
-					EXIT_CODE = 1;
-				}
+			}
+			RUNNING = 0;
+			if (WIFEXITED(status)) {
+				EXIT_CODE = WEXITSTATUS(status);
+			} else if (WIFSIGNALED(status)) {
+				EXIT_CODE = 128 + WTERMSIG(status);
+			} else {
+				fprintf(stderr,
+					"%s: Unexpected error.\n", command);
+				EXIT_CODE = 1;
+			}
 		}
 	}
 

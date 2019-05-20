@@ -36,8 +36,8 @@ main(int argc, char * argv[])
 	while ((opt = getopt(argc, argv, "c:")) != -1)
 		switch (opt) {
 			case 'c':
-				optlen			= strlen(optarg);
-				opts.command 	= malloc(optlen + 1);
+				optlen = strlen(optarg);
+				opts.command = malloc(optlen + 1);
 				if (opts.command == NULL && errno == ENOMEM)
 					fprintf(stderr, "Out  of  memory.\n");
 				strncpy(opts.command, optarg, optlen);
@@ -86,10 +86,10 @@ main(int argc, char * argv[])
 				sh_exit();
 			}
 			if (buff_read == buff_size - (buff_loc - buff)) {
-				int offset	= buff_loc - buff;
-				buff_size	*= 2;
-				buff		= realloc(buff, buff_size);
-				buff_loc	= buff + offset;
+				int offset = buff_loc - buff;
+				buff_size *= 2;
+				buff = realloc(buff, buff_size);
+				buff_loc = buff + offset;
 			}
 		}
 		yy_scan_string(buff);

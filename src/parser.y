@@ -100,7 +100,8 @@ lines:
 	| line lines;
 
 line:
-	 command commands end {
+	SEMICOLON end
+	| command commands end {
 		struct commentry_s *np = malloc(sizeof(struct commentry_s));
 		if(np == NULL && errno == ENOMEM)
 			fprintf(stderr, "Out  of  memory.\n");

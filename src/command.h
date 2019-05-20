@@ -1,5 +1,5 @@
 #ifndef COMMAND_H
-#define COMMAND_H
+#define	COMMAND_H
 
 int
 comm_handle_internal(char * command, int argc, char * argv[]);

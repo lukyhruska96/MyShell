@@ -6,12 +6,14 @@
 	int line = 1;
 %}
 %option noyywrap
+%option nounput
+%option noinput
 
 WHITESPACE		[ \t]
 APPEND			\>\>
 OUT				\>
 IN				\<
-token			[^ \t\n\>\<\#;]+
+token			[^ \t\n\>\<\#\;]+
 
 %x comment
 
@@ -23,7 +25,7 @@ token			[^ \t\n\>\<\#;]+
 {IN}			{ return (IN); }
 {APPEND}		{ return (APPEND); }
 \|				{ return (PIPE); }
-;				{ return (SEMICOLON); }
+\;				{ return (SEMICOLON); }
 \#              { BEGIN(comment); }
 {token}			{ yylval.token = strdup(yytext); return (TOKEN); }
 <INITIAL,comment>\n	{ line++; BEGIN(0); return (END_OF_LINE); }
