@@ -30,7 +30,7 @@ sh_init()
 
 	act.sa_handler = sh_exit_signal;
 	sigemptyset(&act.sa_mask);
-	act.sa_flags = 0;
+	act.sa_flags = SA_RESTART;
 	if (sigaction(SIGINT, &act, NULL) == -1) {
 		if (errno == EFAULT)
 			fprintf(stderr, "Invalid arguments act or oldact.\n");
